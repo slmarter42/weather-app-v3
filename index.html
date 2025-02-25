@@ -1,3 +1,4 @@
+<!--Seth Marter-->
 <!DOCTYPE html>
 <html lang="en">
 <head> 
@@ -8,10 +9,9 @@
   <!-- iOS meta tags for home screen -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Weather App">
+  <meta name="apple-mobile-web-app-title" content="Weather">
 
-  <title>Weather App</title> 
+  <title>Current Weather</title> 
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico"> 
   <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone60x60.png"> 
   <link rel="apple-touch-icon" sizes="60x60" href="images/apple-touch-icon-ipad-76x76.png"> 
@@ -36,6 +36,8 @@
       <i class="bi bi-calendar"></i> <span id="currentDate"></span>
     </h5>
 
+
+    <!--CSS styling courtesy of ChatGPT-->
     <h1 class="mb-3">Current Weather 🌤️</h1>
 
     <!-- ZIP Code Search -->
@@ -62,46 +64,46 @@
   <script>
     // Display the current date
     function displayCurrentDate() {
-      const date = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
+      const dateDate = new Date();
+      const objOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById("currentDate").innerText = dateDate.toLocaleDateString(undefined, objOptons);
     }
 
-    // Async function to fetch weather data using a ZIP code (default: "38501")
+    // Async function to fetch weather data using a ZIP code (default: 38501)
     async function fetchWeather(zip = "38501") {
       try {
-        const zipInput = document.getElementById("cityInput");
+        const strZip = document.getElementById("cityInput"); //Zip is a string according to documentation
         // If input is empty, set to default ZIP code
-        if (!zipInput.value.trim()) {
-          zipInput.value = zip;
+        if (!strZip.value.trim()) {
+          strZip.value = zip;
         }
-        let query = zipInput.value.trim();
+        let strQuery = strZip.value.trim();
 
         // Use the geocoding API to get latitude, longitude, and city name
-        const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en`);
-        const geoData = await geoResponse.json();
-        if (!geoData.results || geoData.results.length === 0) {
+        const objGeoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(strQuery)}&count=1&language=en`);
+        const objGeoData = await objGeoResponse.json();
+        if (!objGeoData.results || objGeoData.results.length === 0) {
           throw new Error("Location not found");
         }
-        const { latitude, longitude, name } = geoData.results[0];
+        const { numLatitude, numLongitude, strName } = objGeoData.results[0];
 
         // Use the coordinates to fetch weather data
-        const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
-        const weatherData = await weatherResponse.json();
+        const objWeatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${numLatitude}&longitude=${numLongitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
+        const objWeatherData = await objWeatherResponse.json();
 
         // Update the UI with the current weather data
-        document.getElementById("cityName").innerText = name;
-        document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
-        document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
-        document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
-        document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
-        document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
+        document.getElementById("cityName").innerText = strName;
+        document.getElementById("temperature").innerText = `${objWeatherData.current.temperature_2m}°F`;
+        document.getElementById("windSpeed").innerText = objWeatherData.current.wind_speed_10m;
+        document.getElementById("rain").innerText = objWeatherData.current.rain ?? "0";
+        document.getElementById("humidity").innerText = objWeatherData.current.relative_humidity_2m;
+        document.getElementById("cloudCover").innerText = objWeatherData.current.cloud_cover;
       } catch (error) {
         alert(error.message);
       }
     }
 
-    // Register Service Worker for offline capability and faster load times
+  // Register Service Worker for offline capability and faster load times (Courtesy of ChatGPT)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       // Replace "your-repo" with your actual repository name.
@@ -121,5 +123,20 @@
 
     displayCurrentDate();
   </script>
+
+  <!--Add footer for credit-->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const footer = document.createElement('footer');
+      footer.className = 'bg-dark text-light py-3';
+      footer.innerHTML = `
+        <div class="container text-center">
+          <p>&copy; Data courtesy of open-meteo.com</p>
+        </div>
+      `;
+      document.body.appendChild(footer);
+    });
+  </script>
+  
 </body>
 </html>
