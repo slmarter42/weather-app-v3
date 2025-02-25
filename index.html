@@ -101,18 +101,18 @@
     }
 
     // Register Service Worker for offline capability and faster load times
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(function(registration) {
-            console.log('Service Worker registered with scope:', registration.scope);
-          })
-          .catch(function(error) {
-            console.error('Service Worker registration failed:', error);
-          });
-      });
-    }
-
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      // Replace "your-repo" with your actual repository name.
+      navigator.serviceWorker.register('/weather-app-v3/service-worker.js')
+        .then(function(registration) {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(function(error) {
+          console.error('Service Worker registration failed:', error);
+        });
+    });
+  }
     // Run default weather fetch for the default ZIP ("38501") when the page loads
     document.addEventListener("DOMContentLoaded", () => {
       fetchWeather("38501");
