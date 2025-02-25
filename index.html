@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8"> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="apple-mobile-web-app-capable" content="yes"> 
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"> 
+    <title>Weather App</title> 
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico"> 
+    <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone60x60.png"> 
+    <link rel="apple-touch-icon" sizes="60x60" href="images/apple-touch-icon-ipad-76x76.png"> 
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-iphone-retina-120x120.png"> 
+    <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-ipad-retina-152x152.png"> 
+    <!-- Link to the manifest file -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Bootstrap CSS w/ Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"> 
+</head> 
+
+<body class="bg-light text-dark">
+  <div class="container text-center mt-4">
+    <!-- Date Display with Icon -->
+    <h5 class="mb-3">
+      <i class="bi bi-calendar"></i> <span id="currentDate"></span>
+    </h5>
+
+    <h1 class="mb-3">Current Weather 🌤️</h1>
+
+    <!-- ZIP Code Search -->
+    <div class="mb-3">
+      <input type="text" id="cityInput" class="form-control d-inline-block w-50" placeholder="Enter 5-digit ZIP code" />
+      <button class="btn btn-primary" onclick="fetchWeather()">Search</button>
+    </div>
+
+    <!-- Current Weather Card -->
+    <div class="card mx-auto shadow-lg" style="max-width: 400px;">
+      <div class="card-body">
+        <h3 class="card-title" id="cityName">City Name</h3>
+        <h4 class="card-subtitle mb-2 text-muted" id="weatherDesc">Weather Description</h4>
+        <h2 id="temperature" class="fw-bold">--°F</h2>
+        <p><i class="bi bi-wind"></i> Wind Speed: <span id="windSpeed">--</span> mph</p>
+        <p><i class="bi bi-droplet"></i> Rain: <span id="rain">--</span> in</p>
+        <p><i class="bi bi-moisture"></i> Humidity: <span id="humidity">--</span>%</p>
+        <p><i class="bi bi-cloud"></i> Cloud Cover: <span id="cloudCover">--</span>%</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Code -->
+  <script>
+    // Display the current date
+    function displayCurrentDate() {
+      const date = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById("currentDate").innerText = date.toLocaleDateString(undefined, options);
+    }
+
+    // Async function to fetch weather data using a ZIP code (default: "38501")
+    async function fetchWeather(zip = "38501") {
+      try {
+        const zipInput = document.getElementById("cityInput");
+        // If input is empty, set to default ZIP code
+        if (!zipInput.value.trim()) {
+          zipInput.value = zip;
+        }
+        let query = zipInput.value.trim();
+
+        // Use the geocoding API to get latitude, longitude, and city name
+        const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en`);
+        const geoData = await geoResponse.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          throw new Error("Location not found");
+        }
+        const { latitude, longitude, name } = geoData.results[0];
+
+        // Use the coordinates to fetch weather data
+        const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,rain,showers,snowfall,cloud_cover,wind_speed_10m&hourly=temperature_2m,precipitation,rain,showers,snowfall,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`);
+        const weatherData = await weatherResponse.json();
+
+        // Update the UI with the current weather data
+        document.getElementById("cityName").innerText = name;
+        document.getElementById("temperature").innerText = `${weatherData.current.temperature_2m}°F`;
+        document.getElementById("windSpeed").innerText = weatherData.current.wind_speed_10m;
+        document.getElementById("rain").innerText = weatherData.current.rain ?? "0";
+        document.getElementById("humidity").innerText = weatherData.current.relative_humidity_2m;
+        document.getElementById("cloudCover").innerText = weatherData.current.cloud_cover;
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Run default weather fetch for the default ZIP ("38501") when the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchWeather("38501");
+    });
+
+    displayCurrentDate();
+  </script>
+</body>
+</html>
